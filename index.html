@@ -2,83 +2,128 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>筋トレ管理アプリ</title>
+<title>筋トレ管理Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
+  margin: 0;
   font-family: Arial;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
   color: white;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
   text-align: center;
+  font-size: 28px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #94a3b8;
+  margin-bottom: 20px;
 }
 
 .card {
-  background: #1e293b;
-  padding: 15px;
-  margin: 15px auto;
-  border-radius: 15px;
-  width: 320px;
+  background: rgba(30,41,59,0.8);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
-input, select, button {
-  padding: 8px;
+input, select {
+  padding: 10px;
   margin: 5px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-}
-
-button {
-  background: #22c55e;
+  width: calc(100% - 20px);
+  background: #0f172a;
   color: white;
 }
 
-li {
+button {
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  margin-top: 5px;
+}
+
+.record {
   background: #334155;
-  margin: 5px;
-  padding: 8px;
-  border-radius: 8px;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>💪 筋トレ管理</h1>
+<div class="container">
+
+<h1>💪 筋トレ管理Pro</h1>
+<p class="subtitle">記録・分析・成長を一つに</p>
 
 <div class="card">
-<h3>記録</h3>
+<h3>記録する</h3>
 
 <input type="date" id="date">
 
 <select id="exerciseSelect">
-  <option value="">選択</option>
+  <option value="">種目を選択</option>
   <option>ベンチプレス</option>
   <option>スクワット</option>
   <option>デッドリフト</option>
 </select>
 
 <input id="exercise" placeholder="または自由入力">
-<input id="weight" type="number" placeholder="kg">
+<input id="weight" type="number" placeholder="重量 (kg)">
 <input id="reps" type="number" placeholder="回数">
 
-<button onclick="addRecord()">追加</button>
+<button onclick="addRecord()">記録する🔥</button>
 </div>
 
 <div class="card">
 <h3>記録一覧</h3>
-<ul id="list"></ul>
+<div id="list"></div>
 </div>
 
 <div class="card">
-<h3>📊 重量グラフ</h3>
+<h3>📊 成長グラフ</h3>
+
 <select id="graphExercise" onchange="drawChart()">
   <option>ベンチプレス</option>
   <option>スクワット</option>
   <option>デッドリフト</option>
 </select>
+
 <canvas id="chart"></canvas>
+</div>
+
 </div>
 
 <script>
@@ -121,12 +166,15 @@ function render() {
   list.innerHTML = "";
 
   records.forEach((rec, i) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "record";
+
+    div.innerHTML = `
       ${rec.date}｜${rec.ex} - ${rec.w}kg × ${rec.r}回
-      <button onclick="deleteRecord(${i})">削除</button>
+      <button class="delete-btn" onclick="deleteRecord(${i})">削除</button>
     `;
-    list.appendChild(li);
+
+    list.appendChild(div);
   });
 }
 
@@ -152,7 +200,8 @@ function drawChart() {
       labels: labels,
       datasets: [{
         label: type + " 重量",
-        data: data
+        data: data,
+        tension: 0.3
       }]
     }
   });
