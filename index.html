@@ -9,9 +9,12 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(rgba(20,15,10,0.85), rgba(20,15,10,0.95)),
+    url("https://images.unsplash.com/photo-1524758631624-e2822e304c36");
+  background-size: cover;
+  background-attachment: fixed;
+  color: #f5f5f5;
 }
 
 .container {
@@ -22,61 +25,73 @@ body {
 
 h1 {
   text-align: center;
-  font-size: 28px;
+  font-size: 30px;
+  letter-spacing: 1px;
 }
 
 .subtitle {
   text-align: center;
-  color: #94a3b8;
+  color: #cbd5f5;
   margin-bottom: 20px;
 }
 
 .card {
-  background: rgba(30,41,59,0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(40,30,20,0.75);
+  backdrop-filter: blur(8px);
   padding: 20px;
   border-radius: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+h3 {
+  margin-top: 0;
 }
 
 input, select {
   padding: 10px;
-  margin: 5px;
+  margin: 5px 0;
   border-radius: 10px;
   border: none;
-  width: calc(100% - 20px);
-  background: #0f172a;
-  color: white;
+  width: 100%;
+  background: #1c1c1c;
+  color: #f5f5f5;
+}
+
+input::placeholder {
+  color: #aaa;
 }
 
 button {
-  padding: 10px;
+  padding: 12px;
   margin-top: 10px;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
-  background: linear-gradient(90deg, #22c55e, #4ade80);
-  color: black;
+  background: linear-gradient(90deg, #8b5e3c, #c08a5b);
+  color: white;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 button:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
+  background: linear-gradient(90deg, #a9744f, #d4a373);
 }
 
 .delete-btn {
-  background: #ef4444;
-  color: white;
-  margin-top: 5px;
+  background: #7f1d1d;
+  margin-top: 8px;
 }
 
 .record {
-  background: #334155;
+  background: rgba(20,15,10,0.7);
   margin: 8px 0;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
+  border-left: 4px solid #c08a5b;
 }
 </style>
 </head>
@@ -86,7 +101,7 @@ button:hover {
 <div class="container">
 
 <h1>💪 筋トレ管理Pro</h1>
-<p class="subtitle">記録・分析・成長を一つに</p>
+<p class="subtitle">記録・分析・成長を木の温もりで</p>
 
 <div class="card">
 <h3>記録する</h3>
@@ -201,6 +216,7 @@ function drawChart() {
       datasets: [{
         label: type + " 重量",
         data: data,
+        borderColor: "#c08a5b",
         tension: 0.3
       }]
     }
