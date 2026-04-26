@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>筋トレ管理アプリ</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+.card {
+  background: #1e293b;
+  padding: 15px;
+  margin: 15px auto;
+  border-radius: 15px;
+  width: 320px;
+}
+
+input, select, button {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  background: #22c55e;
+  color: white;
+}
+
+li {
+  background: #334155;
+  margin: 5px;
+  padding: 8px;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💪 筋トレ管理</h1>
+
+<div class="card">
+<h3>記録</h3>
+
+<input type="date" id="date">
+
+<select id="exerciseSelect">
+  <option value="">選択</option>
+  <option>ベンチプレス</option>
+  <option>スクワット</option>
+  <option>デッドリフト</option>
+</select>
+
+<input id="exercise" placeholder="または自由入力">
+<input id="weight" type="number" placeholder="kg">
+<input id="reps" type="number" placeholder="回数">
+
+<button onclick="addRecord()">追加</button>
+</div>
+
+<div class="card">
+<h3>記録一覧</h3>
+<ul id="list"></ul>
+</div>
+
+<div class="card">
+<h3>📊 重量グラフ</h3>
+<select id="graphExercise" onchange="drawChart()">
+  <option>ベンチプレス</option>
+  <option>スクワット</option>
+  <option>デッドリフト</option>
+</select>
+<canvas id="chart"></canvas>
+</div>
+
+<script>
+let records = JSON.parse(localStorage.getItem("records")) || [];
+
+function save() {
+  localStorage.setItem("records", JSON.stringify(records));
+}
+
+function addRecord() {
+  let ex = document.getElementById("exercise").value;
+  const select = document.getElementById("exerciseSelect").value;
+
+  if (!ex) ex = select;
+
+  const date = document.getElementById("date").value;
+  const w = document.getElementById("weight").value;
+  const r = document.getElementById("reps").value;
+
+  if (!date || !ex || !w || !r) {
+    alert("全部入力して");
+    return;
+  }
+
+  records.push({ date, ex, w: Number(w), r });
+  save();
+  render();
+  drawChart();
+}
+
+function deleteRecord(index) {
+  records.splice(index, 1);
+  save();
+  render();
+  drawChart();
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  records.forEach((rec, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${rec.date}｜${rec.ex} - ${rec.w}kg × ${rec.r}回
+      <button onclick="deleteRecord(${i})">削除</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+let chart;
+
+function drawChart() {
+  const type = document.getElementById("graphExercise").value;
+
+  const filtered = records
+    .filter(r => r.ex === type)
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  const labels = filtered.map(r => r.date);
+  const data = filtered.map(r => r.w);
+
+  const ctx = document.getElementById("chart");
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: type + " 重量",
+        data: data
+      }]
+    }
+  });
+}
+
+render();
+drawChart();
+</script>
+
+</body>
+</html>
