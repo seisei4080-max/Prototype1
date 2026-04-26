@@ -23,30 +23,12 @@ body {
   padding: 20px;
 }
 
-h1 {
-  text-align: center;
-  font-size: 30px;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  text-align: center;
-  color: #cbd5f5;
-  margin-bottom: 20px;
-}
-
 .card {
   background: rgba(40,30,20,0.75);
   backdrop-filter: blur(8px);
   padding: 20px;
   border-radius: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-h3 {
-  margin-top: 0;
 }
 
 input, select {
@@ -56,11 +38,7 @@ input, select {
   border: none;
   width: 100%;
   background: #1c1c1c;
-  color: #f5f5f5;
-}
-
-input::placeholder {
-  color: #aaa;
+  color: white;
 }
 
 button {
@@ -72,18 +50,10 @@ button {
   background: linear-gradient(90deg, #8b5e3c, #c08a5b);
   color: white;
   font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  transform: scale(1.03);
-  background: linear-gradient(90deg, #a9744f, #d4a373);
 }
 
 .delete-btn {
   background: #7f1d1d;
-  margin-top: 8px;
 }
 
 .record {
@@ -91,7 +61,6 @@ button:hover {
   margin: 8px 0;
   padding: 10px;
   border-radius: 12px;
-  border-left: 4px solid #c08a5b;
 }
 </style>
 </head>
@@ -101,25 +70,33 @@ button:hover {
 <div class="container">
 
 <h1>💪 筋トレ管理Pro</h1>
-<p class="subtitle">記録・分析・成長を木の温もりで</p>
+<p>成長を記録し、可視化するトレーニングアプリ</p>
 
 <div class="card">
-<h3>記録する</h3>
+<h3>記録</h3>
 
 <input type="date" id="date">
 
 <select id="exerciseSelect">
-  <option value="">種目を選択</option>
+  <option value="">選択</option>
   <option>ベンチプレス</option>
   <option>スクワット</option>
   <option>デッドリフト</option>
+  <option>懸垂</option>
+  <option>ショルダープレス</option>
+  <option>アームカール</option>
 </select>
 
-<input id="exercise" placeholder="または自由入力">
-<input id="weight" type="number" placeholder="重量 (kg)">
+<input id="exercise" placeholder="自由入力">
+<input id="weight" type="number" placeholder="kg">
 <input id="reps" type="number" placeholder="回数">
 
 <button onclick="addRecord()">記録する🔥</button>
+</div>
+
+<div class="card">
+<h3>📊 分析</h3>
+<p>最高記録(PR): <span id="pr">-</span></p>
 </div>
 
 <div class="card">
@@ -128,7 +105,7 @@ button:hover {
 </div>
 
 <div class="card">
-<h3>📊 成長グラフ</h3>
+<h3>📈 成長グラフ</h3>
 
 <select id="graphExercise" onchange="drawChart()">
   <option>ベンチプレス</option>
@@ -144,6 +121,8 @@ button:hover {
 <script>
 let records = JSON.parse(localStorage.getItem("records")) || [];
 
+document.getElementById("date").value = new Date().toISOString().split("T")[0];
+
 function save() {
   localStorage.setItem("records", JSON.stringify(records));
 }
@@ -151,17 +130,13 @@ function save() {
 function addRecord() {
   let ex = document.getElementById("exercise").value;
   const select = document.getElementById("exerciseSelect").value;
-
   if (!ex) ex = select;
 
   const date = document.getElementById("date").value;
   const w = document.getElementById("weight").value;
   const r = document.getElementById("reps").value;
 
-  if (!date || !ex || !w || !r) {
-    alert("全部入力して");
-    return;
-  }
+  if (!date || !ex || !w || !r) return alert("全部入力");
 
   records.push({ date, ex, w: Number(w), r });
   save();
@@ -169,8 +144,9 @@ function addRecord() {
   drawChart();
 }
 
-function deleteRecord(index) {
-  records.splice(index, 1);
+function deleteRecord(i) {
+  if (!confirm("削除する？")) return;
+  records.splice(i,1);
   save();
   render();
   drawChart();
@@ -180,17 +156,20 @@ function render() {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  records.forEach((rec, i) => {
-    const div = document.createElement("div");
-    div.className = "record";
-
-    div.innerHTML = `
-      ${rec.date}｜${rec.ex} - ${rec.w}kg × ${rec.r}回
-      <button class="delete-btn" onclick="deleteRecord(${i})">削除</button>
+  records.forEach((rec,i)=>{
+    list.innerHTML += `
+      <div class="record">
+        ${rec.date}｜${rec.ex} ${rec.w}kg×${rec.r}
+        <button class="delete-btn" onclick="deleteRecord(${i})">削除</button>
+      </div>
     `;
-
-    list.appendChild(div);
   });
+}
+
+function getPR(type) {
+  const f = records.filter(r=>r.ex===type);
+  if(!f.length) return "-";
+  return Math.max(...f.map(r=>r.w))+"kg";
 }
 
 let chart;
@@ -198,26 +177,30 @@ let chart;
 function drawChart() {
   const type = document.getElementById("graphExercise").value;
 
-  const filtered = records
-    .filter(r => r.ex === type)
-    .sort((a,b) => new Date(a.date) - new Date(b.date));
+  const f = records
+    .filter(r=>r.ex===type)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  const labels = filtered.map(r => r.date);
-  const data = filtered.map(r => r.w);
+  document.getElementById("pr").textContent = getPR(type);
+
+  const labels = f.map(r=>r.date);
+  const data = f.map(r=>r.w);
 
   const ctx = document.getElementById("chart");
 
-  if (chart) chart.destroy();
+  if(chart) chart.destroy();
 
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: type + " 重量",
-        data: data,
-        borderColor: "#c08a5b",
-        tension: 0.3
+  chart = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels,
+      datasets:[{
+        label:type,
+        data,
+        borderColor:"#c08a5b",
+        backgroundColor:"rgba(192,138,91,0.2)",
+        fill:true,
+        tension:0.4
       }]
     }
   });
